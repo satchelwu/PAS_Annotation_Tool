@@ -109,6 +109,7 @@ void MainWindow::SetImagePath()
 
     imgInfo.image_path = path;
 
+
     PicListModelAppend(imgInfo.image_path, pic_slm);
 
     status_image_path->setText("Images : " + imgInfo.image_path);
@@ -300,6 +301,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Alt:
             PicListViewJmpToNextImage();
             break;
+		case Qt::Key_Delete:
+			RemoveCurrentSelectBBox();
+			break;
         default:
             break;
     }
@@ -401,6 +405,7 @@ void MainWindow::PicListModelAppend(const QString &path,QStringListModel* slm)
 
     slm->setStringList(pic_sl);
 
+
     //set default index to 0
     ui->listViewPicList->setCurrentIndex(pic_slm->index(0));
 
@@ -445,7 +450,7 @@ void MainWindow::LoadCurrentImageAndBBox(const QModelIndex &modelIndex)
 
    imgInfo.image_name = ui->listViewPicList->model()->data(modelIndex).toString();
 
-    QImage image(imgInfo.image_path+ "\\" + imgInfo.image_name);
+    QImage image(imgInfo.image_path+ QDir::separator()+ imgInfo.image_name);
 
     if(image.isNull()) return;
 
@@ -479,7 +484,7 @@ QVector<QRect> MainWindow::GetAnnotationsFromFile(QString filename)
 {
     QVector<QRect> rects;
 
-    BBox bb(imgInfo.annotation_path.toStdString(), filename.toStdString());
+	BBox bb(qPrintable(imgInfo.annotation_path), qPrintable(filename));
 
     std::vector<BBox_t> bboxes;
 
@@ -516,7 +521,7 @@ void MainWindow::SetAnnotationsToFile(QString path, QString filename, \
         bboxes.push_back(BBox_t(r.x(), r.y(), r.bottomRight().x(), r.bottomRight().y()));
     }
 
-    BBox bb(path.toStdString(), filename.toStdString());
+    BBox bb(qPrintable(path), qPrintable(filename));
 
     bb.set_bboxes(bboxes, image_size);
 }
@@ -529,7 +534,7 @@ void MainWindow::AutoSaveAnnotationsToFile()
 {
     if(ui->checkBoxAutoSave->isChecked() && imgInfo.dirty_flag == true)
     {
-        QString filename = *(imgInfo.image_name.split(".").begin())+".txt";
+		QString filename = QStringLiteral("%1.txt").arg(imgInfo.image_name.split(".").first());
 
         SetAnnotationsToFile(imgInfo.annotation_path, filename, imgInfo.bboxes, imgInfo.image_size);
     }
@@ -571,6 +576,17 @@ void MainWindow::PicListViewJmpToNextImage()
     {
         ui->listViewPicList->setCurrentIndex(pic_slm->index(modelIndex.row()+1));
     }
+}
+
+void MainWindow::RemoveCurrentSelectBBox()
+{
+	if (ui->listViewLabelList->currentIndex().row() != -1)
+	{
+		ui->listViewLabelList->model()->removeRow(ui->listViewLabelList->currentIndex().row());
+		ui->labelCurrentLabelImage->remove_bbox(ui->listViewLabelList->currentIndex().row());
+		imgInfo.dirty_flag = true;
+		AutoSaveAnnotationsToFile();
+	}
 }
 
 /**

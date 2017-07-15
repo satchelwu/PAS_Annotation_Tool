@@ -70,6 +70,8 @@ public:
 
     void PicListViewJmpToNextImage();
 
+	void RemoveCurrentSelectBBox();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
