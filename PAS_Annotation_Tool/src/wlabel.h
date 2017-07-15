@@ -18,6 +18,11 @@ typedef struct CurrentRect
     bool init;
 
     CurrentRect() : init(false) {}
+	CurrentRect(const QRect& rect){
+		p = rect.topLeft();
+		cp = rect.bottomRight();
+		init = true;
+	}
 
     int w() { return cp.x()-p.x(); }
     int h() { return cp.y()-p.y(); }
@@ -31,6 +36,10 @@ public:
     ~WLabel(){}
 
     void set_bboxs(QVector<QRect> *rects);
+
+	void remove_bbox(int nbBoxIndex);
+
+	void setcurrent_bbox(int nbBoxIndex);
 
     void clear_bboxs() { bboxs = NULL; }
 

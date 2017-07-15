@@ -47,6 +47,37 @@ void WLabel::set_bboxs(QVector<QRect> *rects)
     this->update();
 }
 
+void WLabel::remove_bbox(int nbBoxIndex)
+{
+	if (bboxs->size() > 0)
+	{
+		if (nbBoxIndex < bboxs->size())
+		{
+			bboxs->remove(nbBoxIndex);
+			cbox.init = false;
+			update();
+		}
+	}
+}
+
+void WLabel::setcurrent_bbox(int nbBoxIndex)
+{
+	if (bboxs->size() > 0)
+	{
+		if (nbBoxIndex < bboxs->size())
+		{
+			QRect rect =  bboxs->at(nbBoxIndex);
+			cbox = CRect(rect);
+			update();
+		}
+	}
+	else
+	{
+		cbox.init = false;
+		update();
+	}
+}
+
 /**
  * @brief WLabel::set_image
  * @param image
